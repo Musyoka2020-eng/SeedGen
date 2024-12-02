@@ -10,6 +10,28 @@ body {
     color: hsl(0, 0%, 100%);
 }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    font-size: 24px;
+}
+
+.header a {
+    color: #fff;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background-color: #0056b3;
+}
+
 .container {
     background: #1e1e1e;
     padding: 20px;
@@ -76,4 +98,60 @@ button:hover {
     color: #61dafb;
     max-height: 150px;
     overflow-y: auto;
+}
+
+/* About Page CSS */
+.about-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    background: #171f27;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-top: 4px solid #007bff;
+    transition: transform 0.2s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card h3 {
+    color: #007bff;
+    margin-bottom: 1rem;
+}
+
+.tech-stack {
+    background: #20232a;
+    color: #61dafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.tech-stack ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.tech-stack li {
+    background: rgba(97, 218, 251, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
 }
