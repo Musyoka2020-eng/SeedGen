@@ -1,21 +1,38 @@
+const DEFAULT_LOOKBACK_MONTHS = 5;
+const DEFAULT_DATE_FORMAT = 'YYYY/MM/DD';
+const EDITOR_CONFIG = {
+    value: "// Generated function code will appear here",
+    language: "javascript",
+    theme: "vs-dark",
+    automaticLayout: true,
+    minimap: { enabled: false },
+    formatOnPaste: true,
+    formatOnType: true
+};
 let editor;
 // Initialize Monaco Editor
 require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs' } });
 require(['vs/editor/editor.main'], () => {
-    editor = monaco.editor.create(document.getElementById('codeEditor'), {
-        value: "// Generated function code will appear here",
-        language: "javascript",
-        theme: "vs-dark",
-        automaticLayout: true,
-    });
+    editor = monaco.editor.create(document.getElementById('codeEditor'), EDITOR_CONFIG);
 });
+
+// loading state handler
+function setLoading(isLoading) {
+    const buttons = document.querySelectorAll('button');
+    for (const button of buttons) {
+        button.disabled = isLoading;
+    }
+}
 
 // Function to generate the seed function
 function generateSeedFunction({ period, baseUrl, urlParameters }) {
     const paramsString = JSON.stringify(urlParameters, null, 4);
 
-    const functionTemplate = `function getSeeds() {
-        let start = moment().subtract(5, 'months');
+    // Generate a complete, valid JavaScript function
+    const functionTemplate = `
+    // Seed function to fetch data periodically
+    function getSeeds() {
+        let start = moment().subtract(${DEFAULT_LOOKBACK_MONTHS}, 'months');
         let end = moment();
         const seed = [];
         const baseUrl = '${baseUrl}';
@@ -29,18 +46,17 @@ function generateSeedFunction({ period, baseUrl, urlParameters }) {
         while (currentDate.isBefore(end) || currentDate.isSame(end)) {
             const periodEnd = currentDate.clone().endOf('${period}').isAfter(end) ? end : currentDate.clone().endOf('${period}');
             const params = new URLSearchParams(urlParameters);
-            params.set('start', currentDate.format('YYYY/MM/DD'));
-            params.set('end', periodEnd.format('YYYY/MM/DD'));
-
-            const url = \`\${baseUrl}?\${params.toString()}\`;
+            let startDate = currentDate.format('${DEFAULT_DATE_FORMAT}');
+            let endDate = periodEnd.format('${DEFAULT_DATE_FORMAT}');
+            const url = \`\${baseUrl}?start=\${startDate}&end=\${endDate}&\${params}\`;
             seed.push(url);
 
             currentDate.add(1, '${period}').startOf('${period}');
         }
 
         return seed;
-    }
-    `;
+    }`;
+
     return functionTemplate;
 }
 
@@ -63,19 +79,6 @@ document.getElementById('generatorForm').addEventListener('submit', (e) => {
     editor.setValue(generatedCode);
 });
 
-// Install NPM Module dynamically
-document.getElementById('installModuleBtn').addEventListener('click', async () => {
-    const moduleName = prompt("Enter the NPM module name:");
-    if (!moduleName) return;
-
-    try {
-        const moduleUrl = `https://cdn.jsdelivr.net/npm/${moduleName}`;
-        await import(moduleUrl);
-        alert(`${moduleName} module installed successfully!`);
-    } catch (error) {
-        alert(`Failed to install module: ${error.message}`);
-    }
-});
 
 // Trigger Monaco Editor's Format Command on Button Click
 document.getElementById('formatCodeBtn').addEventListener('click', () => {
@@ -84,73 +87,56 @@ document.getElementById('formatCodeBtn').addEventListener('click', () => {
 });
 
 // Run Code and Capture Output
-document.getElementById('runCodeBtn').addEventListener('click', () => {
-    const code = document.getElementById('codeEditor').value;
+document.getElementById('runCodeBtn').addEventListener('click', async () => {
+    const code = editor.getValue();
     const consoleOutput = document.getElementById('consoleOutput');
     consoleOutput.textContent = "";
 
-    // Add timestamp to logging
+    setLoading(true);
     const timestamp = () => new Date().toISOString().split('T')[1].slice(0, -1);
 
-    // Create sandbox environment with limited scope
-    const sandboxEnv = {
-        console: {
-            log: (...args) => {
-                consoleOutput.textContent += `[${timestamp()}] ${args.join(' ')}\n`;
-            },
-            error: (...args) => {
-                consoleOutput.textContent += `[${timestamp()}] Error: ${args.join(' ')}\n`;
-            },
-            warn: (...args) => {
-                consoleOutput.textContent += `[${timestamp()}] Warning: ${args.join(' ')}\n`;
-            }
-        },
-        // Add other safe APIs here
-        Math: Math,
-        Date: Date,
-        Array: Array,
-        Object: Object,
-        String: String,
-        Number: Number,
-        Boolean: Boolean,
-        Error: Error,
-        undefined: undefined,
-        null: null
-    };
-
     try {
-        // Set execution timeout
-        const timeoutDuration = 10000; // 5 seconds
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Execution timed out')), timeoutDuration);
-        });
-
-        // Wrap code execution in async function to enable timeout
-        const executeCode = async () => {
-            consoleOutput.textContent += `[${timestamp()}] Starting code execution...\n`;
-            const sandboxFunction = new Function(
-                ...Object.keys(sandboxEnv),
-                code
-            );
-
-            // Execute in sandbox
-            return sandboxFunction(...Object.values(sandboxEnv));
+        // Enhanced sandbox environment
+        const sandboxEnv = {
+            console: {
+                log: (...args) => {
+                    consoleOutput.textContent += `[${timestamp()}] ${args.join(' ')}\n`;
+                },
+                error: (...args) => {
+                    consoleOutput.textContent += `[${timestamp()}] ❌ Error: ${args.join(' ')}\n`;
+                },
+                warn: (...args) => {
+                    consoleOutput.textContent += `[${timestamp()}] ⚠️ Warning: ${args.join(' ')}\n`;
+                }
+            },
+            moment: moment.bind(window),
+            URL: window.URL,
+            URLSearchParams: window.URLSearchParams
         };
 
-        // Run code with timeout
-        Promise.race([executeCode(), timeoutPromise])
-            .then(result => {
-                if (result !== undefined) {
-                    consoleOutput.textContent += `[${timestamp()}] Result: ${result}\n`;
+        const wrappedCode = `
+            try {
+                ${code}
+                const seeds = getSeeds();
+                if (Array.isArray(seeds)) {
+                    console.log(\`Found \${seeds.length} seeds:\`);
+                    seeds.forEach((seed, index) => console.log(\`[\${index + 1}] \${seed}\`));
+                } else {
+                    console.warn('getSeeds() did not return an array');
                 }
-                consoleOutput.textContent += `[${timestamp()}] Execution completed successfully\n`;
-            })
-            .catch(error => {
-                consoleOutput.textContent += `[${timestamp()}] Execution Error: ${error.message}\n`;
-            });
+            } catch (e) {
+                console.error(e.message);
+            }
+        `;
 
+        const executeCode = new Function(...Object.keys(sandboxEnv), wrappedCode);
+        await executeCode(...Object.values(sandboxEnv));
+
+        consoleOutput.textContent += `[${timestamp()}] ✅ Execution completed successfully\n`;
     } catch (error) {
-        consoleOutput.textContent += `[${timestamp()}] Syntax Error: ${error.message}\n`;
+        consoleOutput.textContent += `[${timestamp()}] ❌ Execution failed: ${error.message}\n`;
+    } finally {
+        setLoading(false);
     }
 });
 
@@ -173,3 +159,27 @@ document.getElementById('copyOutputBtn').addEventListener('click', () => {
         .then(() => alert("Output copied to clipboard!"))
         .catch(err => alert(`Failed to copy output: ${err}`));
 });
+
+//Auto-save feature
+editor.onDidChangeModelContent(debounce(() => {
+    localStorage.setItem('lastCode', editor.getValue());
+}, 1000));
+
+// Restore last code on load
+const lastCode = localStorage.getItem('lastCode');
+if (lastCode) {
+    editor.setValue(lastCode);
+}
+
+// Simple debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}

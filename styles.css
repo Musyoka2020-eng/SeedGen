@@ -1,12 +1,13 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #282c34;
-    color: #ffffff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+    color: hsl(0, 0%, 100%);
 }
 
 .container {
@@ -15,6 +16,12 @@ body {
     border-radius: 8px;
     max-width: 800px;
     width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+}
+
+h3 {
+    margin: 10px 0;
 }
 
 
@@ -62,6 +69,7 @@ button:hover {
 }
 
 .code-block {
+    margin: 10px 0;
     background-color: #20232a;
     padding: 10px;
     border-radius: 4px;
