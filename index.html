@@ -17,43 +17,80 @@
             <a href="https://musyoka2020-eng.github.io/NameSite/">NameGenerator</a>
         </nav>
     </div>
-    <div class="container">
-        <h2>Seed Function Code Generator</h2>
-        <form id="generatorForm">
-            <label for="baseUrl">Base URL:</label>
-            <input type="text" id="baseUrl" placeholder="https://portal.tjpr.jus.br/e-dj/publico/pesquisa.do" required>
+    <div class="main-container">
+        <div class="form-container">
+            <h2>Seed Function Code Generator</h2>
+            <form id="generatorForm">
+                <label for="baseUrl">Base URL:</label>
+                <input type="text" id="baseUrl" placeholder="https://portal.tjpr.jus.br/e-dj/publico/pesquisa.do"
+                    required>
 
-            <label for="period">Loop Period:</label>
-            <select id="period">
-                <option value="day">Day</option>
-                <option value="week">Week</option>
-                <option value="month">Month</option>
-                <option value="year">Year</option>
-            </select>
+                <label for="period">Loop Period:</label>
+                <select id="period">
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                    <option value="year">Year</option>
+                </select>
 
-            <label for="urlParams">URL Parameters (JSON format):</label>
-            <textarea id="urlParams" rows="4"
-                placeholder='{"actionType": "pesquisa", "page": "1"}'>{"actionType": "pesquisa", "page": "1"}</textarea>
-            <button type="submit">Generate Function Code</button>
-        </form>
+                <label for="urlParams">URL Parameters (JSON format):</label>
+                <textarea id="urlParams" rows="4"
+                    placeholder='{"actionType": "pesquisa", "page": "1"}'>{"actionType": "pesquisa", "page": "1"}</textarea>
+                <br>
+                <span id="infoToggle" style="cursor: pointer; color: blue; text-decoration: underline;">Show Info</span>
+                <div id="infoContent" style="display: none; margin-top: 10px;">
+                    <p>The lookback type and value allow you to specify the time range for fetching data.
+                        Select the type (days, weeks, months, years) and enter the corresponding value to define the
+                        lookback period.</p>
+                </div>
 
-        <h3>Generated Function Code:</h3>
-        <div id="codeEditor" class="code-editor"></div>
+                <label for="lookbackType">Lookback Type:</label>
+                <select id="lookbackType" name="lookbackType" required>
+                    <option value="">Select Lookback Type</option>
+                    <option value="days">Days</option>
+                    <option value="weeks">Weeks</option>
+                    <option value="months">Months</option>
+                    <option value="years">Years</option>
+                </select>
 
-        <div class="buttons">
-            <button id="formatCodeBtn">Format Code</button>
-            <button id="runCodeBtn">Run Code</button>
-            <button id="copyCodeBtn">Copy Code</button>
-            <button id="copyOutputBtn">Copy Output</button>
+                <label for="lookbackValue">Lookback Value:</label>
+                <input type="number" id="lookbackValue" name="lookbackValue" placeholder="Enter Lookback Value"><br>
+
+                <button type="submit">Generate Function Code</button>
+            </form>
         </div>
 
-        <h3>Console Output:</h3>
-        <pre id="consoleOutput" class="code-block"></pre>
+        <div class="editor-container">
+            <h3>Generated Function Code:</h3>
+            <div id="codeEditor" class="code-editor"></div>
+
+            <div class="buttons">
+                <button id="formatCodeBtn">Format Code</button>
+                <button id="runCodeBtn">Run Code</button>
+                <button id="copyCodeBtn">Copy Code</button>
+                <button id="copyOutputBtn">Copy Output</button>
+            </div>
+
+            <h3>Console Output:</h3>
+            <pre id="consoleOutput" class="code-block"></pre>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
     <script src="script.js"></script>
+    <script>
+        document.getElementById('infoToggle').addEventListener('click', function () {
+            const infoContent = document.getElementById('infoContent');
+            if (infoContent.style.display === 'none') {
+                infoContent.style.display = 'block';
+                this.textContent = 'Hide Info';
+            } else {
+                infoContent.style.display = 'none';
+                this.textContent = 'Show Info';
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -25,15 +25,22 @@ function setLoading(isLoading) {
 }
 
 // Function to generate the seed function
-function generateSeedFunction({ period, baseUrl, urlParameters }) {
+function generateSeedFunction({ period, baseUrl, urlParameters, lookbackType, lookbackValue }) {
     const paramsString = JSON.stringify(urlParameters, null, 4);
+    const lookBackTime = lookbackValue || DEFAULT_LOOKBACK_MONTHS;
+    const lookBackType = lookbackType || 'months';
 
     // Generate a complete, valid JavaScript function
     const functionTemplate = `
     // Seed function to fetch data periodically
     function getSeeds() {
-        let start = moment().subtract(${DEFAULT_LOOKBACK_MONTHS}, 'months');
+        let start = moment().subtract(${lookBackTime}, '${lookBackType}');
         let end = moment();
+
+        // Manual Date Override 
+        // start = "2024/01/01"; 
+        // end = "2024/12/31";
+
         const seed = [];
         const baseUrl = '${baseUrl}';
         const urlParameters = ${paramsString};
@@ -45,9 +52,9 @@ function generateSeedFunction({ period, baseUrl, urlParameters }) {
         let currentDate = start.clone();
         while (currentDate.isBefore(end) || currentDate.isSame(end)) {
             const periodEnd = currentDate.clone().endOf('${period}').isAfter(end) ? end : currentDate.clone().endOf('${period}');
-            const params = new URLSearchParams(urlParameters);
             let startDate = currentDate.format('${DEFAULT_DATE_FORMAT}');
             let endDate = periodEnd.format('${DEFAULT_DATE_FORMAT}');
+            const params = Object.keys(urlParameters).map(key => \`\${key}=\${encodeURIComponent(urlParameters[key])}\`).join('&');
             const url = \`\${baseUrl}?start=\${startDate}&end=\${endDate}&\${params}\`;
             seed.push(url);
 
@@ -67,6 +74,8 @@ document.getElementById('generatorForm').addEventListener('submit', (e) => {
     const baseUrl = document.getElementById('baseUrl').value;
     const period = document.getElementById('period').value;
     let urlParameters;
+    const lookbackType = document.getElementById('lookbackType').value;
+    const lookbackValue = Number.parseInt(document.getElementById('lookbackValue').value, 10);
 
     try {
         urlParameters = JSON.parse(document.getElementById('urlParams').value || '{}');
@@ -75,7 +84,7 @@ document.getElementById('generatorForm').addEventListener('submit', (e) => {
         return;
     }
 
-    const generatedCode = generateSeedFunction({ period, baseUrl, urlParameters });
+    const generatedCode = generateSeedFunction({ period, baseUrl, urlParameters, lookbackType, lookbackValue });
     editor.setValue(generatedCode);
 });
 

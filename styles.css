@@ -7,7 +7,10 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #282c34;
-    color: hsl(0, 0%, 100%);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 .header {
@@ -32,20 +35,29 @@ body {
     background-color: #0056b3;
 }
 
-.container {
-    background: #1e1e1e;
+.main-container {
+    display: flex;
+    height: calc(100vh - 60px);
+}
+
+.form-container {
+    width: 20%;
     padding: 20px;
-    border-radius: 8px;
-    max-width: 800px;
-    width: 100%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
+    background: #1e1e1e;
+    border-right: 1px solid #ccc;
+    overflow-y: auto;
+}
+
+.editor-container {
+    width: 80%;
+    padding: 2px 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 h3 {
-    margin: 10px 0;
+    margin: 5px 0;
 }
-
 
 form {
     display: flex;
@@ -69,6 +81,7 @@ button {
 .buttons {
     display: flex;
     gap: 10px;
+    margin-top: 10px;
 }
 
 button {
@@ -85,18 +98,22 @@ button:hover {
 }
 
 .code-editor {
-    height: 300px;
+    flex-grow: 1;
     border: 1px solid #ccc;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-y: auto;
 }
 
 .code-block {
-    margin: 10px 0;
     background-color: #20232a;
     padding: 10px;
     border-radius: 4px;
     color: #61dafb;
-    max-height: 150px;
+    height: 20%;
     overflow-y: auto;
 }
 
